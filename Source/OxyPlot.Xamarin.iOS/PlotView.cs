@@ -389,6 +389,21 @@ namespace OxyPlot.Xamarin.iOS
 			base.WillMoveToSuperview (newsuper);
 		}
 
+        /// <summary>
+        /// Disoses allocated objects
+        /// </summary>
+        /// <param name="disposing"></param>
+        protected override void Dispose(bool disposing)
+        {
+            if (_buff != IntPtr.Zero)
+            {
+                System.Runtime.InteropServices.Marshal.FreeCoTaskMem(_buff);
+                _buff = IntPtr.Zero;
+            }
+
+            base.Dispose(disposing);
+        }
+
         private void HandlePanZoomGesture()
         {
             switch (panZoomGesture.State)

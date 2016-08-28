@@ -385,6 +385,25 @@ namespace OxyPlot.Xamarin.Android
         }
 
         /// <summary>
+        /// Disoses allocated objects
+        /// </summary>
+        /// <param name="disposing"></param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (_bitmap != null)
+                {
+                    _bitmap.Recycle();
+                    _bitmap.Dispose();
+                    _bitmap = null;
+                }
+            }
+
+            base.Dispose(disposing);
+        }
+
+        /// <summary>
         /// Handles touch down events.
         /// </summary>
         /// <param name="e">The motion event arguments.</param>
