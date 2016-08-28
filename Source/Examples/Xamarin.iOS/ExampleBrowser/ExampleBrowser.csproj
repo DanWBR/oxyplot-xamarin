@@ -22,10 +22,20 @@
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
     <MtouchLink>None</MtouchLink>
-    <MtouchDebug>true</MtouchDebug>
-    <MtouchArch>ARMv7</MtouchArch>
-    <MtouchI18n>
-    </MtouchI18n>
+    <MtouchDebug>True</MtouchDebug>
+    <MtouchArch>i386</MtouchArch>
+    <MtouchSdkVersion>9.3</MtouchSdkVersion>
+    <MtouchProfiling>False</MtouchProfiling>
+    <MtouchFastDev>True</MtouchFastDev>
+    <MtouchUseLlvm>False</MtouchUseLlvm>
+    <MtouchUseThumb>False</MtouchUseThumb>
+    <MtouchEnableBitcode>False</MtouchEnableBitcode>
+    <MtouchUseSGen>False</MtouchUseSGen>
+    <MtouchUseRefCounting>False</MtouchUseRefCounting>
+    <OptimizePNGs>True</OptimizePNGs>
+    <MtouchTlsProvider>Default</MtouchTlsProvider>
+    <MtouchHttpClientHandler>HttpClientHandler</MtouchHttpClientHandler>
+    <MtouchFloat32>False</MtouchFloat32>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhoneSimulator' ">
     <DebugType>none</DebugType>
@@ -67,6 +77,10 @@
     </IpaPackageName>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="OxyPlot, Version=1.0.0.0, Culture=neutral, PublicKeyToken=638079a8f0bd61e9, processorArchitecture=MSIL">
+      <HintPath>..\..\..\packages\OxyPlot.Core.1.0.0-unstable2213\lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1+Xamarin.iOS10\OxyPlot.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
@@ -75,6 +89,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Info.plist" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Main.cs" />
@@ -86,6 +101,10 @@
       <Project>{017bff60-40e6-4520-8554-5862a95ef123}</Project>
       <Name>OxyPlot.Xamarin.iOS</Name>
       <IsAppExtension>false</IsAppExtension>
+    </ProjectReference>
+    <ProjectReference Include="..\..\ExampleLibrary\ExampleLibrary.csproj">
+      <Project>{facb89e5-53a5-4748-9f5b-e0714ebb37b2}</Project>
+      <Name>ExampleLibrary</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

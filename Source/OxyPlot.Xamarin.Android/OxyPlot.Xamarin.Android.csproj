@@ -41,17 +41,23 @@
   <ItemGroup>
     <Reference Include="Mono.Android" />
     <Reference Include="mscorlib" />
+    <Reference Include="OxyPlot, Version=1.0.0.0, Culture=neutral, PublicKeyToken=638079a8f0bd61e9, processorArchitecture=MSIL">
+      <HintPath>..\packages\OxyPlot.Core.1.0.0-unstable2213\lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1+Xamarin.iOS10\OxyPlot.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="SkiaSharp, Version=1.53.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
+      <HintPath>..\packages\SkiaSharp.1.53.2-gpu2\lib\MonoAndroid\SkiaSharp.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Xml" />
-    <Reference Include="OxyPlot">
-      <HintPath>..\packages\OxyPlot.Core.1.0.0-unstable2156\lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1+Xamarin.iOS10\OxyPlot.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CanvasRenderContext.cs" />
+    <Compile Include="SKCanvasRenderContext.cs" />
     <Compile Include="ExtensionMethods.cs" />
+    <Compile Include="PlotViewGL.cs" />
     <Compile Include="PlotView.cs" />
     <Compile Include="Properties\AssemblyDescription.cs" />
     <Compile Include="..\AssemblyInfo.cs">
@@ -61,7 +67,7 @@
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <ItemGroup>
     <AndroidResource Include="Main.axml">
-      <DependentUpon>CanvasRenderContext.cs</DependentUpon>
+      <DependentUpon>SKCanvasRenderContext.cs</DependentUpon>
     </AndroidResource>
   </ItemGroup>
   <ItemGroup>

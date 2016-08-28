@@ -7,17 +7,17 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace OxyPlot.Xamarin.Android
+namespace OxyPlot.Xamarin.iOS
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using global::Android.Graphics;
+    using SkiaSharp;
 
     /// <summary>
     /// Provides a render context for Android.Graphics.Canvas.
     /// </summary>
-    public class CanvasRenderContext : RenderContextBase
+    public class SKCanvasRenderContext : RenderContextBase
     {
         /// <summary>
         /// The images in use
@@ -27,22 +27,22 @@ namespace OxyPlot.Xamarin.Android
         /// <summary>
         /// The image cache
         /// </summary>
-        private readonly Dictionary<OxyImage, Bitmap> imageCache = new Dictionary<OxyImage, Bitmap>();
+        private readonly Dictionary<OxyImage, SKBitmap> imageCache = new Dictionary<OxyImage, SKBitmap>();
 
         /// <summary>
         /// The current paint.
         /// </summary>
-        private readonly Paint paint;
+        private readonly SKPaint paint;
 
         /// <summary>
         /// A reusable path object.
         /// </summary>
-        private readonly Path path;
+        private readonly SKPath path;
 
         /// <summary>
         /// A reusable bounds rectangle.
         /// </summary>
-        private readonly Rect bounds;
+        private readonly SKRect bounds;
 
         /// <summary>
         /// A reusable list of points.
@@ -52,17 +52,17 @@ namespace OxyPlot.Xamarin.Android
         /// <summary>
         /// The canvas to draw on.
         /// </summary>
-        private Canvas canvas;
-
+        private SKCanvas canvas;
+        
         /// <summary>
-        /// Initializes a new instance of the <see cref="CanvasRenderContext" /> class.
+        /// Initializes a new instance of the <see cref="SKCanvasRenderContext" /> class.
         /// </summary>
         /// <param name="scale">The scale.</param>
-        public CanvasRenderContext(double scale)
+        public SKCanvasRenderContext(double scale)
         {
-            this.paint = new Paint();
-            this.path = new Path();
-            this.bounds = new Rect();
+            this.paint = new SKPaint();
+            this.path = new SKPath();
+            this.bounds = new SKRect();
             this.pts = new List<float>();
             this.Scale = scale;
         }
@@ -78,9 +78,33 @@ namespace OxyPlot.Xamarin.Android
         /// Sets the target.
         /// </summary>
         /// <param name="c">The canvas.</param>
-        public void SetTarget(Canvas c)
+        public void SetTarget(SKCanvas c)
         {
             this.canvas = c;
+        }
+
+        /// <summary>
+        /// Resets the paint state
+        /// </summary>
+        private void Reset()
+        {
+            this.paint.Color = new SKColor(0, 0, 0);
+            this.paint.Style = SKPaintStyle.Fill;
+            this.paint.StrokeCap = SKStrokeCap.Butt;
+            this.paint.StrokeJoin = SKStrokeJoin.Mitter;
+            this.paint.TextAlign = SKTextAlign.Left;
+            this.paint.Typeface = null;
+            this.paint.StrokeWidth = 1.0f;
+            this.paint.StrokeMiter = 4.0f;
+            this.paint.TextSize = 20.0f;
+            this.paint.TextScaleX = 1.0f;
+            this.paint.TextSkewX = 0.0f;
+            this.paint.XferMode = SKXferMode.SrcOver;
+            this.paint.ColorFilter = null;
+            this.paint.Shader = null;
+            this.paint.PathEffect = null;
+            this.paint.MaskFilter = null;
+            this.paint.HintingLevel = SKPaintHinting.Normal;
         }
 
         /// <summary>
@@ -92,7 +116,7 @@ namespace OxyPlot.Xamarin.Android
         /// <param name="thickness">The thickness.</param>
         public override void DrawEllipse(OxyRect rect, OxyColor fill, OxyColor stroke, double thickness)
         {
-            this.paint.Reset();
+            this.Reset();
             {
                 if (fill.IsVisible())
                 {
@@ -118,7 +142,7 @@ namespace OxyPlot.Xamarin.Android
         /// <param name="thickness">The stroke thickness.</param>
         public override void DrawEllipses(IList<OxyRect> rectangles, OxyColor fill, OxyColor stroke, double thickness)
         {
-            this.paint.Reset();
+            this.Reset();
             {
                 foreach (var rect in rectangles)
                 {
@@ -148,7 +172,7 @@ namespace OxyPlot.Xamarin.Android
         /// <param name="aliased">if set to <c>true</c> the shape will be aliased.</param>
         public override void DrawLine(IList<ScreenPoint> points, OxyColor stroke, double thickness, double[] dashArray, LineJoin lineJoin, bool aliased)
         {
-            this.paint.Reset();
+            this.Reset();
             {
                 this.path.Reset();
                 {
@@ -171,28 +195,30 @@ namespace OxyPlot.Xamarin.Android
         /// <param name="aliased">If set to <c>true</c> the shape will be aliased.</param>
         public override void DrawLineSegments(IList<ScreenPoint> points, OxyColor stroke, double thickness, double[] dashArray, LineJoin lineJoin, bool aliased)
         {
-            this.paint.Reset();
+            this.Reset();
             {
                 this.SetStroke(stroke, thickness, dashArray, lineJoin, aliased);
-                this.pts.Clear();
+           
                 if (aliased)
                 {
-                    foreach (var p in points)
+                    for (int i = 0; i < points.Count; i += 2)
                     {
-                        this.pts.Add(this.ConvertAliased(p.X));
-                        this.pts.Add(this.ConvertAliased(p.Y));
+                        var pt0 = points[i];
+                        var pt1 = points[i + 1];
+
+                        this.canvas.DrawLine(this.ConvertAliased(pt0.X), this.ConvertAliased(pt0.Y), this.ConvertAliased(pt1.X), this.ConvertAliased(pt1.Y), this.paint);
                     }
                 }
                 else
                 {
-                    foreach (var p in points)
+                    for (int i = 0; i < points.Count; i += 2)
                     {
-                        this.pts.Add(this.Convert(p.X));
-                        this.pts.Add(this.Convert(p.Y));
+                        var pt0 = points[i];
+                        var pt1 = points[i + 1];
+
+                        this.canvas.DrawLine(this.Convert(pt0.X), this.Convert(pt0.Y), this.Convert(pt1.X), this.Convert(pt1.Y), this.paint);
                     }
                 }
-
-                this.canvas.DrawLines(this.pts.ToArray(), this.paint);
             }
         }
 
@@ -208,7 +234,7 @@ namespace OxyPlot.Xamarin.Android
         /// <param name="aliased">If set to <c>true</c> the shape will be aliased.</param>
         public override void DrawPolygon(IList<ScreenPoint> points, OxyColor fill, OxyColor stroke, double thickness, double[] dashArray, LineJoin lineJoin, bool aliased)
         {
-            this.paint.Reset();
+            this.Reset();
             {
                 this.path.Reset();
                 {
@@ -239,18 +265,18 @@ namespace OxyPlot.Xamarin.Android
         /// <param name="thickness">The stroke thickness.</param>
         public override void DrawRectangle(OxyRect rect, OxyColor fill, OxyColor stroke, double thickness)
         {
-            this.paint.Reset();
+            this.Reset();
             {
                 if (fill.IsVisible())
                 {
                     this.SetFill(fill);
-                    this.canvas.DrawRect(this.ConvertAliased(rect.Left), this.ConvertAliased(rect.Top), this.ConvertAliased(rect.Right), this.ConvertAliased(rect.Bottom), this.paint);
+                    this.canvas.DrawRect(new SKRect(this.ConvertAliased(rect.Left), this.ConvertAliased(rect.Top), this.ConvertAliased(rect.Right), this.ConvertAliased(rect.Bottom)), this.paint);
                 }
 
                 if (stroke.IsVisible())
                 {
                     this.SetStroke(stroke, thickness, aliased: true);
-                    this.canvas.DrawRect(this.ConvertAliased(rect.Left), this.ConvertAliased(rect.Top), this.ConvertAliased(rect.Right), this.ConvertAliased(rect.Bottom), this.paint);
+                    this.canvas.DrawRect(new SKRect(this.ConvertAliased(rect.Left), this.ConvertAliased(rect.Top), this.ConvertAliased(rect.Right), this.ConvertAliased(rect.Bottom)), this.paint);
                 }
             }
         }
@@ -270,7 +296,7 @@ namespace OxyPlot.Xamarin.Android
         /// <param name="maxSize">The maximum size of the text.</param>
         public override void DrawText(ScreenPoint p, string text, OxyColor fill, string fontFamily, double fontSize, double fontWeight, double rotate, HorizontalAlignment halign, VerticalAlignment valign, OxySize? maxSize)
         {
-            this.paint.Reset();
+            this.Reset();
             {
                 this.paint.TextSize = this.Convert(fontSize);
                 this.SetFill(fill);
@@ -281,8 +307,7 @@ namespace OxyPlot.Xamarin.Android
                 this.GetFontMetrics(this.paint, out lineHeight, out delta);
                 if (maxSize.HasValue || halign != HorizontalAlignment.Left || valign != VerticalAlignment.Bottom)
                 {
-                    this.paint.GetTextBounds(text, 0, text.Length, this.bounds);
-                    width = this.bounds.Left + this.bounds.Width();
+                    width = this.paint.MeasureText(text);
                     height = lineHeight;
                 }
                 else
@@ -312,15 +337,15 @@ namespace OxyPlot.Xamarin.Android
                 var y0 = delta;
 
                 this.canvas.Save();
-                this.canvas.Translate(this.Convert(p.X), this.Convert(p.Y));
-                this.canvas.Rotate((float)rotate);
+                this.canvas.Translate(this.Convert(p.X), this.Convert(p.Y));                
+                this.canvas.RotateDegrees((float)rotate);
                 this.canvas.Translate((float)dx + x0, (float)dy + y0);
 
                 if (maxSize.HasValue)
                 {
                     var x1 = -x0;
                     var y1 = -height - y0;
-                    this.canvas.ClipRect(x1, y1, x1 + width, y1 + height);
+                    this.canvas.ClipRect(new SKRect(x1, y1, x1 + width, y1 + height));
                     this.canvas.Translate(0, lineHeight - height);
                 }
 
@@ -344,14 +369,14 @@ namespace OxyPlot.Xamarin.Android
                 return OxySize.Empty;
             }
 
-            this.paint.Reset();
+            this.Reset();
             {
-                this.paint.AntiAlias = true;
+                this.paint.IsAntialias = true;
                 this.paint.TextSize = this.Convert(fontSize);
                 float lineHeight, delta;
                 this.GetFontMetrics(this.paint, out lineHeight, out delta);
-                this.paint.GetTextBounds(text, 0, text.Length, this.bounds);
-                return new OxySize(this.bounds.Width() / this.Scale, lineHeight / this.Scale);
+                var textWidth = this.paint.MeasureText(text);
+                return new OxySize(textWidth / this.Scale, lineHeight / this.Scale);
             }
         }
 
@@ -408,10 +433,10 @@ namespace OxyPlot.Xamarin.Android
                 return;
             }
 
-            var src = new Rect((int)srcX, (int)srcY, (int)(srcX + srcWidth), (int)(srcY + srcHeight));
-            var dest = new RectF(this.Convert(destX), this.Convert(destY), this.Convert(destX + destWidth), this.Convert(destY + destHeight));
+            var src = new SKRect((int)srcX, (int)srcY, (int)(srcX + srcWidth), (int)(srcY + srcHeight));
+            var dest = new SKRect(this.Convert(destX), this.Convert(destY), this.Convert(destX + destWidth), this.Convert(destY + destHeight));
 
-            this.paint.Reset();
+            this.Reset();
 
             // TODO: support opacity
             this.canvas.DrawBitmap(image, src, dest, this.paint);
@@ -440,9 +465,9 @@ namespace OxyPlot.Xamarin.Android
         /// <param name="paint">The paint.</param>
         /// <param name="defaultLineHeight">Default line height.</param>
         /// <param name="delta">The vertical delta.</param>
-        private void GetFontMetrics(Paint paint, out float defaultLineHeight, out float delta)
+        private void GetFontMetrics(SKPaint paint, out float defaultLineHeight, out float delta)
         {
-            var metrics = paint.GetFontMetrics();
+            var metrics = paint.FontMetrics;
             var ascent = -metrics.Ascent;
             var descent = metrics.Descent;
             var leading = metrics.Leading;
@@ -471,9 +496,9 @@ namespace OxyPlot.Xamarin.Android
         /// </summary>
         /// <param name="rect">The rectangle to convert.</param>
         /// <returns>The converted rectangle.</returns>
-        private RectF Convert(OxyRect rect)
+        private SKRect Convert(OxyRect rect)
         {
-            return new RectF(this.ConvertAliased(rect.Left), this.ConvertAliased(rect.Top), this.ConvertAliased(rect.Right), this.ConvertAliased(rect.Bottom));
+            return new SKRect(this.ConvertAliased(rect.Left), this.ConvertAliased(rect.Top), this.ConvertAliased(rect.Right), this.ConvertAliased(rect.Bottom));
         }
 
         /// <summary>
@@ -517,9 +542,9 @@ namespace OxyPlot.Xamarin.Android
         /// <param name="fill">The fill color.</param>
         private void SetFill(OxyColor fill)
         {
-            this.paint.SetStyle(Paint.Style.Fill);
-            this.paint.Color = fill.ToColor();
-            this.paint.AntiAlias = true;
+            this.paint.Style = SKPaintStyle.Fill;
+            this.paint.Color = fill.ToSKColor();
+            this.paint.IsAntialias = true;
         }
 
         /// <summary>
@@ -532,17 +557,17 @@ namespace OxyPlot.Xamarin.Android
         /// <param name="aliased">Use aliased strokes if set to <c>true</c>.</param>
         private void SetStroke(OxyColor stroke, double thickness, double[] dashArray = null, LineJoin lineJoin = LineJoin.Miter, bool aliased = false)
         {
-            this.paint.SetStyle(Paint.Style.Stroke);
-            this.paint.Color = stroke.ToColor();
+            this.paint.Style = SKPaintStyle.Stroke;
+            this.paint.Color = stroke.ToSKColor();
             this.paint.StrokeWidth = this.Convert(thickness);
             this.paint.StrokeJoin = lineJoin.Convert();
             if (dashArray != null)
             {
-                var dashArrayF = dashArray.Select(this.Convert).ToArray();
-                this.paint.SetPathEffect(new DashPathEffect(dashArrayF, 0f));
+                var dashArrayF = dashArray.Select(this.Convert).ToArray();                
+                this.paint.PathEffect = SKPathEffect.CreateDash(dashArrayF, 0f);
             }
 
-            this.paint.AntiAlias = !aliased;
+            this.paint.IsAntialias = !aliased;
         }
 
         /// <summary>
@@ -550,7 +575,7 @@ namespace OxyPlot.Xamarin.Android
         /// </summary>
         /// <param name="source">The source image.</param>
         /// <returns>A <see cref="Bitmap" />.</returns>
-        private Bitmap GetImage(OxyImage source)
+        private SKBitmap GetImage(OxyImage source)
         {
             if (source == null)
             {
@@ -562,11 +587,11 @@ namespace OxyPlot.Xamarin.Android
                 this.imagesInUse.Add(source);
             }
 
-            Bitmap bitmap;
+            SKBitmap bitmap;
             if (!this.imageCache.TryGetValue(source, out bitmap))
             {
                 var bytes = source.GetData();
-                bitmap = BitmapFactory.DecodeByteArray(bytes, 0, bytes.Length);
+                bitmap = SKBitmap.Decode(bytes);
                 this.imageCache.Add(source, bitmap);
             }
 

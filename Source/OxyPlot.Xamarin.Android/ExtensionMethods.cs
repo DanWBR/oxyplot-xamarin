@@ -13,6 +13,7 @@ namespace OxyPlot.Xamarin.Android
 
     using global::Android.Graphics;
     using global::Android.Views;
+    using SkiaSharp;
 
     /// <summary>
     /// Provides extension methods that converts between Android types and OxyPlot types.
@@ -30,20 +31,30 @@ namespace OxyPlot.Xamarin.Android
         }
 
         /// <summary>
+        /// Converts an <see cref="OxyColor" /> to a <see cref="Color" />.
+        /// </summary>
+        /// <param name="color">The color to convert.</param>
+        /// <returns>The converted color.</returns>
+        public static SKColor ToSKColor(this OxyColor color)
+        {
+            return color.IsInvisible() ? new SKColor(0, 0, 0, 0) : new SKColor(color.R, color.G, color.B, color.A);
+        }
+
+        /// <summary>
         /// Converts an <see cref="LineJoin" /> to a <see cref="Paint.Join" />.
         /// </summary>
         /// <param name="join">The join value to convert.</param>
         /// <returns>The converted join value.</returns>
-        public static Paint.Join Convert(this LineJoin join)
+        public static SKStrokeJoin Convert(this LineJoin join)
         {
             switch (join)
             {
                 case LineJoin.Bevel:
-                    return Paint.Join.Bevel;
+                    return SKStrokeJoin.Bevel;
                 case LineJoin.Miter:
-                    return Paint.Join.Miter;
+                    return SKStrokeJoin.Mitter;
                 case LineJoin.Round:
-                    return Paint.Join.Round;
+                    return SKStrokeJoin.Round;
                 default:
                     throw new InvalidOperationException("Invalid join type.");
             }

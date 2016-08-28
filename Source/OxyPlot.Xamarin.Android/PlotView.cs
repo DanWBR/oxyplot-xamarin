@@ -17,6 +17,7 @@ namespace OxyPlot.Xamarin.Android
     using global::Android.Views;
 
     using OxyPlot;
+    using SkiaSharp;
 
     /// <summary>
     /// Represents a view that can show a <see cref="PlotModel" />.
@@ -58,7 +59,7 @@ namespace OxyPlot.Xamarin.Android
         /// <summary>
         /// The current render context.
         /// </summary>
-        private CanvasRenderContext rc;
+        private SKCanvasRenderContext rc;
 
         /// <summary>
         /// The model invalidated flag.
@@ -308,6 +309,8 @@ namespace OxyPlot.Xamarin.Android
             return handled;
         }
 
+        private Bitmap _bitmap = null;
+
         /// <summary>
         /// Draws the content of the control.
         /// </summary>
@@ -315,42 +318,70 @@ namespace OxyPlot.Xamarin.Android
         protected override void OnDraw(Canvas canvas)
         {
             base.OnDraw(canvas);
-            var actualModel = this.ActualModel;
-            if (actualModel == null)
-            {
-                return;
-            }
 
-            if (actualModel.Background.IsVisible())
-            {
-                canvas.DrawColor(actualModel.Background.ToColor());
-            }
-            else
-            {
-                // do nothing
-            }
 
-            lock (this.invalidateLock)
+            if (_bitmap == null || _bitmap.Width != canvas.Width || _bitmap.Height != canvas.Height)
             {
-                if (this.isModelInvalidated)
+                if (_bitmap != null)
                 {
-                    ((IPlotModel)actualModel).Update(this.updateDataFlag);
-                    this.updateDataFlag = false;
-                    this.isModelInvalidated = false;
-                }
-            }
-
-            lock (this.renderingLock)
-            {
-                if (this.rc == null)
-                {
-                    this.rc = new CanvasRenderContext(Scale);
+                    _bitmap.Recycle();
+                    _bitmap.Dispose();
+                    _bitmap = null;
                 }
 
-                this.rc.SetTarget(canvas);
-                
-                ((IPlotModel)actualModel).Render(this.rc, Width / Scale, Height / Scale);
+                _bitmap = Bitmap.CreateBitmap(canvas.Width, canvas.Height, Bitmap.Config.Argb8888);
             }
+
+            try
+            {
+                using (var surface = SKSurface.Create(canvas.Width, canvas.Height, SKColorType.Rgba8888, SKAlphaType.Premul, _bitmap.LockPixels(), canvas.Width * 4))
+                {
+                    var skcanvas = surface.Canvas;
+
+                    var actualModel = this.ActualModel;
+                    if (actualModel == null)
+                    {
+                        return;
+                    }
+
+                    if (actualModel.Background.IsVisible())
+                    {
+                        skcanvas.Clear(actualModel.Background.ToSKColor());
+                    }
+                    else
+                    {
+                        skcanvas.Clear();
+                    }
+
+                    lock (this.invalidateLock)
+                    {
+                        if (this.isModelInvalidated)
+                        {
+                            ((IPlotModel)actualModel).Update(this.updateDataFlag);
+                            this.updateDataFlag = false;
+                            this.isModelInvalidated = false;
+                        }
+                    }
+
+                    lock (this.renderingLock)
+                    {
+                        if (this.rc == null)
+                        {
+                            this.rc = new SKCanvasRenderContext(Scale);
+                        }
+
+                        this.rc.SetTarget(skcanvas);
+
+                        ((IPlotModel)actualModel).Render(this.rc, Width / Scale, Height / Scale);
+                    }
+                }
+            }
+            finally
+            {
+                _bitmap.UnlockPixels();
+            }
+
+            canvas.DrawBitmap(_bitmap, 0, 0, null);
         }
 
         /// <summary>

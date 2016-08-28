@@ -32,6 +32,7 @@ namespace ExampleBrowser
 
             this.SetContentView(Resource.Layout.PlotActivity);
             var plotView = this.FindViewById<PlotView>(Resource.Id.plotview);
+            plotView.SetBackgroundColor(Android.Graphics.Color.White);
             plotView.Model = model;
         }
     }

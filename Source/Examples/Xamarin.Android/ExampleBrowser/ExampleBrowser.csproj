@@ -45,6 +45,10 @@
   <ItemGroup>
     <Reference Include="Mono.Android" />
     <Reference Include="mscorlib" />
+    <Reference Include="OxyPlot, Version=1.0.0.0, Culture=neutral, PublicKeyToken=638079a8f0bd61e9, processorArchitecture=MSIL">
+      <HintPath>..\..\..\packages\OxyPlot.Core.1.0.0-unstable2213\lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1+Xamarin.iOS10\OxyPlot.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -61,6 +65,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="packages.config" />
     <None Include="Resources\AboutResources.txt" />
     <None Include="Assets\AboutAssets.txt" />
     <AndroidResource Include="Resources\Layout\ListItem.axml" />
@@ -78,10 +83,6 @@
     <ProjectReference Include="..\..\..\OxyPlot.Xamarin.Android\OxyPlot.Xamarin.Android.csproj">
       <Project>{e965ba32-9561-4e2a-adb0-19487b25a939}</Project>
       <Name>OxyPlot.Xamarin.Android</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\OxyPlot\OxyPlot.csproj">
-      <Project>{7A0B35C0-DD17-4964-8E9A-44D6CECDC692}</Project>
-      <Name>OxyPlot</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\ExampleLibrary\ExampleLibrary.csproj">
       <Project>{FACB89E5-53A5-4748-9F5B-E0714EBB37B2}</Project>

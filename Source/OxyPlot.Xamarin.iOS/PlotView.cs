@@ -9,8 +9,10 @@
 
 namespace OxyPlot.Xamarin.iOS
 {
+    using CoreGraphics;
     using Foundation;
     using OxyPlot;
+    using SkiaSharp;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -22,6 +24,12 @@ namespace OxyPlot.Xamarin.iOS
     [Register("PlotView")]
     public class PlotView : UIView, IPlotView
     {
+        private const int BitmapInfo = ((int)CGBitmapFlags.ByteOrder32Big) | ((int)CGImageAlphaInfo.PremultipliedLast);
+
+        private IntPtr _buff = IntPtr.Zero;
+        private int _bufferHeight;
+        private int _bufferWidth;
+
         /// <summary>
         /// The current plot model.
         /// </summary>
@@ -286,26 +294,65 @@ namespace OxyPlot.Xamarin.iOS
             UIPasteboard.General.SetValue(new NSString(text), "public.utf8-plain-text");
         }
 
+
+
         /// <summary>
         /// Draws the content of the view.
         /// </summary>
         /// <param name="rect">The rectangle to draw.</param>
         public override void Draw(CoreGraphics.CGRect rect)
         {
+            var screenScale = UIScreen.MainScreen.Scale;
+            var width = (int)(Bounds.Width * screenScale);
+            var height = (int)(Bounds.Height * screenScale);
+
+            if (_buff == IntPtr.Zero || width != _bufferWidth || height != _bufferHeight)
+            {
+                if (_buff != IntPtr.Zero)
+                {
+                    System.Runtime.InteropServices.Marshal.FreeCoTaskMem(_buff);
+                }
+
+                _buff = System.Runtime.InteropServices.Marshal.AllocCoTaskMem(width * height * 4);
+
+                _bufferWidth = width;
+                _bufferHeight = height;
+            }
+
             var actualModel = (IPlotModel)this.model;
             if (actualModel != null)
             {
-                var context = UIGraphics.GetCurrentContext ();
-                using (var renderer = new CoreGraphicsRenderContext(context))
+                using (var surface = SKSurface.Create(width, height, SKImageInfo.PlatformColorType, SKAlphaType.Premul, _buff, width * 4))
                 {
-                    if (actualModel.Background.IsVisible())
-                    {
-                        context.SetFillColor (actualModel.Background.ToCGColor ());
-                        context.FillRect (rect);
-                    }
+                    var skcanvas = surface.Canvas;
 
-                    actualModel.Render(renderer, rect.Width, rect.Height);
+                    skcanvas.Clear();
+
+                    using (new SKAutoCanvasRestore(skcanvas, true))
+                    {
+                        var renderer = new SKCanvasRenderContext(screenScale);
+
+                        renderer.SetTarget(skcanvas);
+
+                        if (actualModel.Background.IsVisible())
+                        {
+                            skcanvas.Clear(actualModel.Background.ToSKColor());
+                        }
+
+                        actualModel.Render(renderer, rect.Width, rect.Height);
+                    }
                 }
+            }
+
+            using (var colorSpace = CGColorSpace.CreateDeviceRGB())
+            using (var bContext = new CGBitmapContext(_buff, width, height, 8, width * 4, colorSpace, (CGImageAlphaInfo)BitmapInfo))
+            using (var image = bContext.ToImage())
+            using (var context = UIGraphics.GetCurrentContext())
+            {
+                // flip the image for CGContext.DrawImage
+                context.TranslateCTM(0, Frame.Height);
+                context.ScaleCTM(1, -1);
+                context.DrawImage(Bounds, image);
             }
         }
 

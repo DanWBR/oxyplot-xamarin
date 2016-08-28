@@ -14,6 +14,7 @@ namespace OxyPlot.Xamarin.iOS
     using CoreGraphics;
     using OxyPlot;
     using UIKit;
+    using SkiaSharp;
 
     /// <summary>
     /// Provides extension methods that converts between MonoTouch and OxyPlot types.
@@ -70,22 +71,32 @@ namespace OxyPlot.Xamarin.iOS
         }
 
         /// <summary>
-        /// Converts a <see cref="LineJoin" /> to a <see cref="CGLineCap" />.
+        /// Converts an <see cref="OxyColor" /> to a <see cref="Color" />.
         /// </summary>
-        /// <param name="lineJoin">The line join.</param>
-        /// <returns>The converted join.</returns>
-        public static CGLineJoin Convert(this LineJoin lineJoin)
+        /// <param name="color">The color to convert.</param>
+        /// <returns>The converted color.</returns>
+        public static SKColor ToSKColor(this OxyColor color)
         {
-            switch (lineJoin)
+            return color.IsInvisible() ? new SKColor(0, 0, 0, 0) : new SKColor(color.R, color.G, color.B, color.A);
+        }
+
+        /// <summary>
+        /// Converts an <see cref="LineJoin" /> to a <see cref="Paint.Join" />.
+        /// </summary>
+        /// <param name="join">The join value to convert.</param>
+        /// <returns>The converted join value.</returns>
+        public static SKStrokeJoin Convert(this LineJoin join)
+        {
+            switch (join)
             {
-            case LineJoin.Bevel:
-                return CGLineJoin.Bevel;
-            case LineJoin.Miter:
-                return CGLineJoin.Miter;
-            case LineJoin.Round:
-                return CGLineJoin.Round;
-            default:
-                throw new InvalidOperationException("Invalid join type.");
+                case LineJoin.Bevel:
+                    return SKStrokeJoin.Bevel;
+                case LineJoin.Miter:
+                    return SKStrokeJoin.Mitter;
+                case LineJoin.Round:
+                    return SKStrokeJoin.Round;
+                default:
+                    throw new InvalidOperationException("Invalid join type.");
             }
         }
 
