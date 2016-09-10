@@ -59,14 +59,13 @@ namespace ExampleLibrary
             var model = new PlotModel { Title = "Two LineSeries" };
             model.Axes.Add(new LinearAxis { Position = AxisPosition.Bottom });
             model.Axes.Add(new LinearAxis { Position = AxisPosition.Left });
+            var lineSeries1 = CreateExampleLineSeries();
+            lineSeries1.Title = "LineSeries 1";
+            model.Series.Add(lineSeries1);
 
-            for (int i = 0; i < 8; i++)
-            {
-                var lineSeries1 = CreateExampleLineSeries(i + 1, 300);
-                lineSeries1.Title = $"LineSeries {i + 1}";
-                model.Series.Add(lineSeries1);
-            }
-
+            var lineSeries2 = CreateExampleLineSeries(41);
+            lineSeries2.Title = "LineSeries 2";
+            model.Series.Add(lineSeries2);
             return model;
         }
 
@@ -285,12 +284,12 @@ namespace ExampleLibrary
         /// Creates an example line series.
         /// </summary>
         /// <returns>A line series containing random points.</returns>
-        private static LineSeries CreateExampleLineSeries(int seed = 13, int count = 10)
+        private static LineSeries CreateExampleLineSeries(int seed = 13)
         {
             var lineSeries1 = new LineSeries();
             var r = new Random(seed);
             var y = r.Next(10, 30);
-            for (int x = 0; x <= count * 10; x += 10)
+            for (int x = 0; x <= 100; x += 10)
             {
                 lineSeries1.Points.Add(new DataPoint(x, y));
                 y += r.Next(-5, 5);

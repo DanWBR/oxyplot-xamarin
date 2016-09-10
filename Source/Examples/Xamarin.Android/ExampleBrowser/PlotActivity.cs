@@ -28,6 +28,7 @@ namespace ExampleBrowser
 
             var exampleInfo = ExampleLibrary.Examples.GetList().FirstOrDefault(ei => ei.Category == category && ei.Title == plot);
             var model = exampleInfo.PlotModel;
+            model.Background = OxyPlot.OxyColor.FromRgb(255, 255, 255);
             this.Title = exampleInfo.Title;
 
             this.SetContentView(Resource.Layout.PlotActivity);

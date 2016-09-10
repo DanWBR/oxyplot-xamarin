@@ -345,7 +345,9 @@ namespace OxyPlot.Xamarin.iOS
                 {
                     var x1 = -x0;
                     var y1 = -height - y0;
-                    this.canvas.ClipRect(new SKRect(x1, y1, x1 + width, y1 + height));
+
+                    // has problem on gl on ios
+                    // this.canvas.ClipRect(new SKRect(x1, y1, x1 + width, y1 + height));
                     this.canvas.Translate(0, lineHeight - height);
                 }
 

@@ -326,19 +326,19 @@ namespace OxyPlot.Xamarin.iOS
                 {
                     var skcanvas = surface.Canvas;
 
-                    skcanvas.Clear();
+                    if (actualModel.Background.IsVisible())
+                    {
+                        skcanvas.Clear(actualModel.Background.ToSKColor());
+                    }
+                    else
+                    {
+                        skcanvas.Clear();
+                    }
 
                     using (new SKAutoCanvasRestore(skcanvas, true))
                     {
                         var renderer = new SKCanvasRenderContext(screenScale);
-
-                        renderer.SetTarget(skcanvas);
-
-                        if (actualModel.Background.IsVisible())
-                        {
-                            skcanvas.Clear(actualModel.Background.ToSKColor());
-                        }
-
+                        renderer.SetTarget(skcanvas);                        
                         actualModel.Render(renderer, rect.Width, rect.Height);
                     }
                 }
